@@ -85,7 +85,7 @@ router.get("/api/auth/google/callback",
                 res.cookie("temp_token", tempToken, {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
-                    sameSite: "lax",
+                    sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for cross-domain in production
                     path: "/",
                     maxAge: 10 * 60 * 1000, // 10 minutes
                 });
@@ -105,7 +105,7 @@ router.get("/api/auth/google/callback",
                     res.cookie("token", token, {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
-                        sameSite: "lax",
+                        sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for cross-domain in production
                         path: "/",
                         maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
                     });
@@ -279,7 +279,7 @@ router.post("/login", async(req, res) => {
         res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
-            sameSite: "lax", // or "none" if using HTTPS and cross-site
+            sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for cross-domain in production
             path: "/",
             maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
         });
@@ -325,14 +325,14 @@ router.get("/profile", jwtAuthMiddleware, async(req,res) => {
 })
 
 router.post("/logout", (req, res) => {
-          res.cookie("token", "", {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
-            sameSite: "lax",
-            path: "/",
-            expires: new Date(0), // Expire the cookie
-        });
-  res.status(200).json({ message: "Logged out" });
+    res.cookie("token", "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
+        sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for cross-domain in production
+        path: "/",
+        expires: new Date(0), // Expire the cookie
+    });
+    res.status(200).json({ message: "Logged out" });
 });
 
 // Test route to check Google OAuth status
@@ -378,7 +378,7 @@ router.post("/setup-password", tempTokenAuthMiddleware, async (req, res) => {
         res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
-            sameSite: "lax",
+            sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for cross-domain in production
             path: "/",
             maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
         });
@@ -387,7 +387,7 @@ router.post("/setup-password", tempTokenAuthMiddleware, async (req, res) => {
         res.cookie("temp_token", "", {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
-            sameSite: "lax",
+            sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for cross-domain in production
             path: "/",
             expires: new Date(0),
         });
