@@ -16,7 +16,7 @@ const icons = {
 };
 
 export default function Dashboard() {
-  const { token, logout } = useAuth();
+  const { token, logout, isAuthenticated } = useAuth();
   const router = useRouter();
   const [stats, setStats] = useState({
     products: 0,
@@ -34,17 +34,26 @@ export default function Dashboard() {
     async function fetchStats() {
       try {
         const productsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product`, {
-          credentials: "include",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
         const products = await productsRes.json();
 
         const categoriesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`, {
-          credentials: "include",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
         const categories = await categoriesRes.json();
 
         const ordersRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order`, {
-          credentials: "include",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
         const orders = await ordersRes.json();
 
@@ -76,11 +85,20 @@ export default function Dashboard() {
   const handleLogout = async () => {
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/logout`, {
       method: "POST",
-      credentials: "include",
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
     });
     logout();
             router.push(process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000/");
   };
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated && !loading) {
+    router.push('/login');
+    return null;
+  }
 
   return (
     <RequireAuth>

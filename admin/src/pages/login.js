@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./../context/AuthContext";
 
@@ -9,6 +9,16 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
+  // Check for token in URL params (from user frontend redirect)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    if (token) {
+      login(token);
+      router.push('/dashboard');
+    }
+  }, [login, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,8 +34,9 @@ export default function Login() {
     });
 
     if (res.ok) {
-      console.log("Login success, token: No need to store token, cookie is set by backend");
-      login();
+      const data = await res.json();
+      console.log("Login success, token:", data.token);
+      login(data.token);
       router.push("/dashboard");
     } else {
       const err = await res.json();
