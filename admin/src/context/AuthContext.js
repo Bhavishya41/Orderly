@@ -6,35 +6,55 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check auth status by calling a protected endpoint
-    async function checkAuth() {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/profile`, {
-          credentials: "include", // send cookies
-        });
-        setIsAuthenticated(res.ok);
-      } catch {
-        setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
-      }
+    // Check if token exists in localStorage
+    const storedToken = localStorage.getItem('adminToken');
+    if (storedToken) {
+      setToken(storedToken);
+      checkAuth(storedToken);
+    } else {
+      setLoading(false);
     }
-    checkAuth();
   }, []);
 
-  const login = () => {
+  const checkAuth = async (authToken) => {
+    console.log("Checking auth with token:", authToken);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/profile`, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log("Auth check response:", res.status);
+      setIsAuthenticated(res.ok);
+    } catch (error) {
+      console.error("Auth check error:", error);
+      setIsAuthenticated(false);
+      localStorage.removeItem('adminToken');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const login = (authToken) => {
+    console.log("Setting token:", authToken);
+    setToken(authToken);
+    localStorage.setItem('adminToken', authToken);
     setIsAuthenticated(true);
   };
 
   const logout = () => {
+    setToken(null);
+    localStorage.removeItem('adminToken');
     setIsAuthenticated(false);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, loading }}>
+    <AuthContext.Provider value={{ isAuthenticated, token, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

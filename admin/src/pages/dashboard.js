@@ -32,6 +32,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function fetchStats() {
+      console.log("Token:", token);
+      console.log("Is authenticated:", isAuthenticated);
+      if (!token) {
+        console.log("No token available");
+        return;
+      }
       try {
         const productsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product`, {
           headers: {
@@ -39,7 +45,7 @@ export default function Dashboard() {
             'Content-Type': 'application/json'
           }
         });
-        const products = await productsRes.json();
+        const products = productsRes.ok ? await productsRes.json() : [];
 
         const categoriesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`, {
           headers: {
@@ -47,7 +53,7 @@ export default function Dashboard() {
             'Content-Type': 'application/json'
           }
         });
-        const categories = await categoriesRes.json();
+        const categories = categoriesRes.ok ? await categoriesRes.json() : [];
 
         const ordersRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order`, {
           headers: {
@@ -55,7 +61,7 @@ export default function Dashboard() {
             'Content-Type': 'application/json'
           }
         });
-        const orders = await ordersRes.json();
+        const orders = ordersRes.ok ? await ordersRes.json() : [];
 
         const totalValue = products.reduce(
           (sum, p) => sum + (Number(p.price) * Number(p.stock)),
