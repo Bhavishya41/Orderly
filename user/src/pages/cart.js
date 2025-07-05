@@ -21,7 +21,7 @@ export default function CartPage() {
     setSendingOtp(true);
     setOtpError("");
     try {
-      const res = await fetch("http://localhost:8000/order/request-otp", {
+              const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/order/request-otp`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -47,14 +47,14 @@ export default function CartPage() {
     setResendingVerification(true);
     try {
       // Get user email from profile
-      const profileRes = await fetch("http://localhost:8000/user/profile", {
+              const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/profile`, {
         credentials: "include",
       });
       
       if (profileRes.ok) {
         const user = await profileRes.json();
         
-        const res = await fetch("http://localhost:8000/user/resend-verification", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/resend-verification`, {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
@@ -87,7 +87,7 @@ export default function CartPage() {
     setPlacingOrder(true);
     setOrderError("");
     try {
-      const res = await fetch("http://localhost:8000/order", {
+              const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/order`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

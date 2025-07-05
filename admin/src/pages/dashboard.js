@@ -79,7 +79,7 @@ export default function Dashboard() {
       credentials: "include",
     });
     logout();
-    router.push("http://localhost:3000/");
+            router.push(process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000/");
   };
 
   return (

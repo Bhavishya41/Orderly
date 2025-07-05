@@ -89,12 +89,12 @@ router.get("/api/auth/google/callback",
                     maxAge: 10 * 60 * 1000, // 10 minutes
                 });
                 
-                res.redirect(`http://localhost:3000/auth/setup-password?email=${user.email}`);
+                res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/setup-password?email=${user.email}`);
             } else {
                 if (isFromSignup) {
                     // User tried to sign up but already has account, redirect to login with message
                     console.log("Redirecting to login with account exists message");
-                    res.redirect("http://localhost:3000/auth/login?error=account_exists&email=" + encodeURIComponent(user.email));
+                    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/login?error=account_exists&email=` + encodeURIComponent(user.email));
                 } else {
                     // Normal login flow
                     console.log("Normal login flow");
@@ -110,12 +110,12 @@ router.get("/api/auth/google/callback",
                     });
 
                     // Redirect to home page without token in URL
-                    res.redirect("http://localhost:3000/");
+                    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/`);
                 }
             }
         } catch (error) {
             console.error("Google OAuth callback error:", error);
-            res.redirect("http://localhost:3000/auth/login?error=oauth_failed");
+            res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/login?error=oauth_failed`);
         }
     }
 );

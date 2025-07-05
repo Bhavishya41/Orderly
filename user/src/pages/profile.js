@@ -48,8 +48,8 @@ export default function ProfilePage() {
       setError("");
       try {
         const [userRes, ordersRes] = await Promise.all([
-          fetch("http://localhost:8000/user/profile", { credentials: "include" }),
-          fetch("http://localhost:8000/order", { credentials: "include" })
+                  fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/profile`, { credentials: "include" }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/order`, { credentials: "include" })
         ]);
         if (!userRes.ok) throw new Error("Failed to fetch user info");
         if (!ordersRes.ok) throw new Error("Failed to fetch orders");

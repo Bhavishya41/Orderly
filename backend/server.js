@@ -35,7 +35,10 @@ app.use(passport.session());
 require('./middlewares/googleOAuth');
 
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:3001"],
+  origin: [
+    process.env.FRONTEND_URL || "http://localhost:3000", 
+    process.env.FRONTEND_ADMIN_URL || "http://localhost:3001"
+  ],
   credentials: true
 }));
 

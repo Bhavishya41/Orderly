@@ -76,12 +76,12 @@ const sendVerificationEmail = async (email, verificationToken) => {
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #ff6b35;">Verify Your Email Address</h2>
           <p>Thank you for signing up! Please click the button below to verify your email address:</p>
-          <a href="http://localhost:3000/auth/verify?token=${verificationToken}" 
+          <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/verify?token=${verificationToken}" 
              style="background-color: #ff6b35; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
             Verify Email Address
           </a>
           <p>If the button doesn't work, copy and paste this link into your browser:</p>
-          <p>http://localhost:3000/auth/verify?token=${verificationToken}</p>
+                      <p>${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/verify?token=${verificationToken}</p>
           <p>This link will expire in 24 hours.</p>
         </div>
       `

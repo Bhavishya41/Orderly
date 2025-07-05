@@ -40,7 +40,7 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/user/login", {
+              const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -74,7 +74,7 @@ export default function Login() {
 
   const handleResendVerification = async () => {
     try {
-      const res = await fetch("http://localhost:8000/user/resend-verification", {
+              const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/resend-verification`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: form.email }),
@@ -95,12 +95,12 @@ export default function Login() {
 
   const handleGoogleLogin = () => {
     // Redirect to Google OAuth
-    window.location.href = "http://localhost:8000/user/api/auth/google";
+            window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/api/auth/google`;
   };
 
   const handleDifferentGoogleAccount = () => {
     // Redirect to Google OAuth with prompt=select_account to force account selection
-    window.location.href = "http://localhost:8000/user/api/auth/google?prompt=select_account";
+            window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/api/auth/google?prompt=select_account`;
   };
 
   return (

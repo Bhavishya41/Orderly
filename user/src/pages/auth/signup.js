@@ -34,7 +34,7 @@ export default function SignUp() {
     try {
       console.log("Submitting...");
       console.log("About to fetch...");
-      const res = await fetch("http://localhost:8000/user/signup", {
+              const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: form.name, email: form.email, password: form.password }),
@@ -62,7 +62,7 @@ export default function SignUp() {
 
   const handleGoogleSignup = () => {
     // Redirect to Google OAuth with signup parameter
-    window.location.href = "http://localhost:8000/user/api/auth/google?from=signup";
+            window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/api/auth/google?from=signup`;
   };
 
   return (

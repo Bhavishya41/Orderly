@@ -8,7 +8,7 @@ export default function Hero({ marqueeImages = [] }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("http://localhost:8000/user/profile", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/profile`, {
           credentials: "include",
         });
         setLoggedIn(res.ok);
