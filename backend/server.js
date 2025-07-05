@@ -36,7 +36,8 @@ require('./middlewares/googleOAuth');
 app.use(cors({
   origin: [
     process.env.FRONTEND_URL || "http://localhost:3000", 
-    process.env.FRONTEND_ADMIN_URL || "http://localhost:3001"
+    "https://orderly-admin.vercel.app",
+    "http://localhost:3001"
   ],
   credentials: true
 }));
