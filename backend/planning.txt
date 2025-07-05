@@ -1,0 +1,46 @@
+!! Inventory managment system !!
+
+Functionalities:-
+1.JWT based signup & login system (password hashing using bcrypt)
+2.models for user, product, category, order. (linked via references)
+3.products belong to user
+4.products belong to category
+5.order has multiple products
+6.user can change his password 
+7.admin can add, update and delete a product
+8.user can see the list of all products
+9.user can see products of a specific category
+10.user can order single or multiple products which will be added to his order collection
+
+---------------------------------------------------------------------------------------------------------------
+Routes:-
+|
+|---->userRoutes:-
+|     |
+|     |---->POST /user/signup: sign up a user, assigning him a token 
+|     |---->POST /user/login: login a user using email and password, showing him his token
+|     |---->PUT  /user/profile/password: user can change his password if he remembers current password
+|     |---->GET  /user/profile: user can see profile information
+|
+|
+|---->orderRoutes:-
+|     |
+|     |---->POST /order: User can place an order with single or multiple products
+|     |---->GET  /order: Get list of orders for logged-in user
+|     |---->DELETE /order/:orderId: Delete an order by orderId
+|
+|
+|---->productRoutes:-
+|     |
+|     |---->POST /product: Only admin can add a product
+|     |---->PUT  /product/:id: Only admin can edit a product
+|     |---->DEL  /product/:id: Only admin can delete a product
+|     |---->GET  /products: anyone can see the list of all the products
+|     |---->GET  /product/:categoryId: anyone can see the list of products of a specific category
+|
+|---->categoryRoutes:-
+|     |
+|     |---->POST /category:	Add category (admin only)
+|     |---->GET  /categories: List all categories
+
+----------------------------------------------------------------------------------------------------------------
