@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function AddCategoryModal({ onClose, onCategoryAdded }) {
+  const { token } = useAuth();
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -12,8 +14,10 @@ export default function AddCategoryModal({ onClose, onCategoryAdded }) {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        headers: { 
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ name }),
       });
       if (!res.ok) {

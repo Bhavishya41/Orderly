@@ -1,7 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function ProductForm({ onClose, onProductSaved, initialData }) {
+  const { token } = useAuth();
   const [categories, setCategories] = useState([]);
   const [form, setForm] = useState({
     name: "",
@@ -33,7 +35,10 @@ export default function ProductForm({ onClose, onProductSaved, initialData }) {
     async function fetchCategories() {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`, {
-          credentials: "include",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
         if (res.ok) {
           const data = await res.json();
@@ -44,7 +49,7 @@ export default function ProductForm({ onClose, onProductSaved, initialData }) {
       }
     }
     fetchCategories();
-  }, []);
+  }, [token]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -84,7 +89,9 @@ export default function ProductForm({ onClose, onProductSaved, initialData }) {
 
       const res = await fetch(url, {
         method,
-        credentials: "include",
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formData,
       });
       if (res.ok) {

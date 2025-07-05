@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 import RequireAuth from "./../context/RequireAuth";
 import OrderTable from "../components/dashboard/order/OrderTable";
 import OrderFilterBar from "../components/dashboard/order/OrderFilterBar";
+import { useAuth } from "./../context/AuthContext";
 
 export default function ManageOrders() {
+  const { token } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("");
@@ -16,12 +18,16 @@ export default function ManageOrders() {
     setLoading(true);
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order`, {
-        credentials: "include",
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
-      const data = await res.json();
+      const data = res.ok ? await res.json() : [];
       setOrders(data);
     } catch (err) {
-      // Optionally handle error
+      console.error("Error fetching orders:", err);
+      setOrders([]);
     } finally {
       setLoading(false);
     }

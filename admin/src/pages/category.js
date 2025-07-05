@@ -4,8 +4,10 @@ import RequireAuth from "./../context/RequireAuth";
 import CategoryTable from "./../components/dashboard/category/CategoryTable";
 import AddCategoryModal from "./../components/dashboard/category/AddCategoryModal";
 import { HiOutlinePlus } from "react-icons/hi";
+import { useAuth } from "./../context/AuthContext";
 
 export default function ManageCategories() {
+  const { token } = useAuth();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -16,12 +18,16 @@ export default function ManageCategories() {
     setLoading(true);
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`, {
-        credentials: "include",
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
-      const data = await res.json();
+      const data = res.ok ? await res.json() : [];
       setCategories(data);
     } catch (err) {
-      // Optionally handle error
+      console.error("Error fetching categories:", err);
+      setCategories([]);
     } finally {
       setLoading(false);
     }
@@ -37,11 +43,14 @@ export default function ManageCategories() {
     try {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category/${id}`, {
         method: "DELETE",
-        credentials: "include",
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       fetchCategories();
     } catch (err) {
-      // Optionally handle error
+      console.error("Error deleting category:", err);
     }
   }
 

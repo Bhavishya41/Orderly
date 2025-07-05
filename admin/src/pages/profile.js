@@ -2,8 +2,10 @@
 import { useEffect, useState } from "react";
 import { HiOutlineKey, HiOutlineLogout } from "react-icons/hi";
 import RequireAuth from "./../context/RequireAuth";
+import { useAuth } from "./../context/AuthContext";
 
 export default function ProfilePage() {
+  const { token } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -15,12 +17,15 @@ export default function ProfilePage() {
       setLoading(true);
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/profile`, {
-          credentials: "include",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
-        const data = await res.json();
+        const data = res.ok ? await res.json() : null;
         setProfile(data);
       } catch (err) {
-        // handle error
+        console.error("Error fetching profile:", err);
       } finally {
         setLoading(false);
       }
@@ -28,25 +33,44 @@ export default function ProfilePage() {
     async function fetchStats() {
       try {
         const [productsRes, ordersRes, categoriesRes] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/product`, { credentials: "include" }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/order`, { credentials: "include" }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`, { credentials: "include" }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/product`, { 
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/order`, { 
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`, { 
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }),
         ]);
         const [products, orders, categories] = await Promise.all([
-          productsRes.json(),
-          ordersRes.json(),
-          categoriesRes.json(),
+          productsRes.ok ? productsRes.json() : [],
+          ordersRes.ok ? ordersRes.json() : [],
+          categoriesRes.ok ? categoriesRes.json() : [],
         ]);
         setStats({
           products: Array.isArray(products) ? products.length : 0,
           orders: Array.isArray(orders) ? orders.length : 0,
           categories: Array.isArray(categories) ? categories.length : 0,
         });
-      } catch (err) {}
+      } catch (err) {
+        console.error("Error fetching stats:", err);
+      }
     }
-    fetchProfile();
-    fetchStats();
-  }, []);
+    if (token) {
+      fetchProfile();
+      fetchStats();
+    }
+  }, [token]);
 
   if (loading || !profile) {
     return (
@@ -86,9 +110,19 @@ export default function ProfilePage() {
               Change Password
             </button>
             <button
-              onClick={() => {
-                // You can implement logout logic here
-                window.location.href = "/auth/login";
+              onClick={async () => {
+                try {
+                  await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/logout`, {
+                    method: "POST",
+                    headers: {
+                      'Authorization': `Bearer ${token}`,
+                      'Content-Type': 'application/json'
+                    }
+                  });
+                } catch (err) {
+                  console.error("Logout error:", err);
+                }
+                window.location.href = "/login";
               }}
               className="flex items-center gap-1 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white px-3 py-1 rounded-lg text-sm shadow transition"
             >
@@ -139,8 +173,10 @@ function PasswordModal({ onClose }) {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/profile/password`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        headers: { 
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ currPassword: oldPassword, newPassword }),
       });
       if (!res.ok) {

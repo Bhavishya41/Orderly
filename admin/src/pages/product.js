@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import ProductForm from "../components/dashboard/product/ProductForm";
 import RequireAuth from "./../context/RequireAuth";
 import ProductTable from "../components/dashboard/product/productTable";
+import { useAuth } from "./../context/AuthContext";
 
 export default function AdminProductsPage() {
+  const { token } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -17,7 +19,10 @@ export default function AdminProductsPage() {
     setLoading(true);
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product`, {
-        credentials: "include",
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       if (!res.ok) throw new Error("Failed to fetch products");
       const data = await res.json();
@@ -39,7 +44,10 @@ export default function AdminProductsPage() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product/${productId}`, {
         method: "DELETE",
-        credentials: "include",
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       if (!res.ok) throw new Error("Failed to delete product");
       fetchProducts();
