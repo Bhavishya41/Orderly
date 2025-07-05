@@ -97,7 +97,7 @@ export default function Dashboard() {
       }
     });
     logout();
-            router.push(process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000/");
+    router.push(process.env.NEXT_PUBLIC_USER_FRONTEND_URL || "http://localhost:3000/");
   };
 
   // Redirect to login if not authenticated

@@ -122,7 +122,7 @@ export default function ProfilePage() {
                 } catch (err) {
                   console.error("Logout error:", err);
                 }
-                window.location.href = "/login";
+                window.location.href = process.env.NEXT_PUBLIC_USER_FRONTEND_URL || "http://localhost:3000/";
               }}
               className="flex items-center gap-1 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white px-3 py-1 rounded-lg text-sm shadow transition"
             >
