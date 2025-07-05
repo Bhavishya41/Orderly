@@ -62,7 +62,9 @@ export default function Login() {
       setSuccess(true);
       window.dispatchEvent(new Event("authchange"));
       if (data.role === "admin") {
-        window.location.href = process.env.NEXT_PUBLIC_ADMIN_URL;
+        // For admin, redirect to admin login with token
+        const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001";
+        window.location.href = `${adminUrl}/login?token=${data.token}`;
       } else {
         window.location.href = "/";
       }
