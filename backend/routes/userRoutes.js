@@ -83,7 +83,7 @@ router.get("/api/auth/google/callback",
                 
                 res.cookie("temp_token", tempToken, {
                     httpOnly: true,
-                    secure: false,
+                    secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
                     sameSite: "lax",
                     path: "/",
                     maxAge: 10 * 60 * 1000, // 10 minutes
@@ -103,7 +103,7 @@ router.get("/api/auth/google/callback",
                     
                     res.cookie("token", token, {
                         httpOnly: true,
-                        secure: false,
+                        secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
                         sameSite: "lax",
                         path: "/",
                         maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
@@ -269,7 +269,7 @@ router.post("/login", async(req, res) => {
         let token = generateToken(payload);
         res.cookie("token", token, {
             httpOnly: true,
-            secure: false, // true if using HTTPS
+            secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
             sameSite: "lax", // or "none" if using HTTPS and cross-site
             path: "/",
             maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
@@ -316,13 +316,13 @@ router.get("/profile", jwtAuthMiddleware, async(req,res) => {
 })
 
 router.post("/logout", (req, res) => {
-  res.cookie("token", "", {
-    httpOnly: true,
-    secure: false, // true if using HTTPS
-    sameSite: "lax",
-    path: "/",
-    expires: new Date(0), // Expire the cookie
-  });
+          res.cookie("token", "", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
+            sameSite: "lax",
+            path: "/",
+            expires: new Date(0), // Expire the cookie
+        });
   res.status(200).json({ message: "Logged out" });
 });
 
@@ -368,7 +368,7 @@ router.post("/setup-password", tempTokenAuthMiddleware, async (req, res) => {
         // Set permanent token cookie
         res.cookie("token", token, {
             httpOnly: true,
-            secure: false,
+            secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
             sameSite: "lax",
             path: "/",
             maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
@@ -377,7 +377,7 @@ router.post("/setup-password", tempTokenAuthMiddleware, async (req, res) => {
         // Clear temp token
         res.cookie("temp_token", "", {
             httpOnly: true,
-            secure: false,
+            secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
             sameSite: "lax",
             path: "/",
             expires: new Date(0),
