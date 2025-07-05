@@ -21,7 +21,7 @@ export default function ProfilePage() {
     setPwSuccess("");
     setPwError("");
     try {
-      const res = await fetch("http://localhost:8000/user/profile/password", {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL, {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
