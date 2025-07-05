@@ -62,7 +62,7 @@ export default function Login() {
       setSuccess(true);
       window.dispatchEvent(new Event("authchange"));
       if (data.role === "admin") {
-        window.location.href = process.env.NEXT_PUBLIC_API_URL;
+        window.location.href = process.env.NEXT_PUBLIC_ADMIN_URL;
       } else {
         window.location.href = "/";
       }
