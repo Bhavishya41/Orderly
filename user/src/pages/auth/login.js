@@ -26,6 +26,23 @@ export default function Login() {
     }
   }, [router.query]);
 
+  // Clear any cached authentication state on page load
+  useEffect(() => {
+    // Clear any localStorage tokens that might be from admin frontend
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('userToken');
+      
+      // Also try to clear any cookies by calling logout endpoint
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/logout`, {
+        method: "POST",
+        credentials: "include",
+      }).catch(err => {
+        console.log("Logout call failed (expected if not logged in):", err);
+      });
+    }
+  }, []);
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setError("");
@@ -40,7 +57,8 @@ export default function Login() {
     }
     setLoading(true);
     try {
-              const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/login`, {
+      console.log("Attempting login for:", form.email);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -48,6 +66,7 @@ export default function Login() {
       });
       if (!res.ok) {
         const data = await res.json();
+        console.log("Login failed:", data);
         if (data.needsVerification) {
           setError(data.message);
           // Show resend verification option
@@ -59,6 +78,7 @@ export default function Login() {
         return;
       }
       const data = await res.json();
+      console.log("Login successful:", data);
       setSuccess(true);
       window.dispatchEvent(new Event("authchange"));
       if (data.role === "admin") {
