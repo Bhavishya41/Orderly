@@ -19,9 +19,9 @@ router.post("/request-otp", jwtAuthMiddleware, async (req, res) => {
         console.log("User email verified status:", user.emailVerified);
         console.log("User email:", user.email);
 
-        // Allow Google OAuth users to request OTP even if email not verified
+        // Allow Google OAuth users and admin users to request OTP even if email not verified
         // (they'll get verification email in the callback)
-        if (!user.emailVerified && !user.googleId) {
+        if (!user.emailVerified && !user.googleId && user.role !== "admin") {
             return res.status(400).json({ 
                 message: "Please verify your email first. Check your inbox for verification email or use Google OAuth to sign in." 
             });
@@ -61,15 +61,17 @@ router.post("/", jwtAuthMiddleware, async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         } 
 
-        // Verify OTP
-        if (!verifyOTP(user.orderOtp, user.orderOtpExpires, otp)) {
-            return res.status(400).json({ message: "Invalid or expired OTP" });
-        }
+        // Verify OTP (skip for admin users)
+        if (user.role !== "admin") {
+            if (!verifyOTP(user.orderOtp, user.orderOtpExpires, otp)) {
+                return res.status(400).json({ message: "Invalid or expired OTP" });
+            }
 
-        // Clear OTP after successful verification
-        user.orderOtp = null;
-        user.orderOtpExpires = null;
-        await user.save();
+            // Clear OTP after successful verification
+            user.orderOtp = null;
+            user.orderOtpExpires = null;
+            await user.save();
+        }
 
         const order = new Order({
             username: user.name,

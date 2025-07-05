@@ -58,7 +58,8 @@ router.get("/api/auth/google/callback",
             
             // Send verification email for Google OAuth users (even though they're pre-verified)
             // This ensures they have a verification email for any edge cases
-            if (!user.verificationToken) {
+            // Skip verification for admin users
+            if (!user.verificationToken && user.role !== "admin") {
                 const verificationToken = crypto.randomBytes(32).toString('hex');
                 const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
                 
@@ -148,12 +149,15 @@ router.post("/signup", async(req, res) => {
             }
         }
         
-        // Generate verification token
-        const verificationToken = crypto.randomBytes(32).toString('hex');
-        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+        // Generate verification token (skip for admin users)
+        let verificationToken, verificationExpires;
+        if (user.role !== "admin") {
+            verificationToken = crypto.randomBytes(32).toString('hex');
+            verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+        }
         
-        // Create user with verification fields
-        user.emailVerified = false;
+        // Create user with verification fields (admin users are pre-verified)
+        user.emailVerified = user.role === "admin" ? true : false;
         user.verificationToken = verificationToken;
         user.verificationExpires = verificationExpires;
         
@@ -161,15 +165,20 @@ router.post("/signup", async(req, res) => {
         let result = await newUser.save();
         console.log("User saved:", result);
 
-        // Send verification email
-        const emailResult = await sendVerificationEmail(user.email, verificationToken);
-        if (!emailResult.success) {
-            console.error("Failed to send verification email:", emailResult.error);
-            // Still create the user but log the email failure
+        // Send verification email (skip for admin users)
+        let emailResult = { success: true };
+        if (user.role !== "admin") {
+            emailResult = await sendVerificationEmail(user.email, verificationToken);
+            if (!emailResult.success) {
+                console.error("Failed to send verification email:", emailResult.error);
+                // Still create the user but log the email failure
+            }
         }
 
         res.status(201).json({ 
-            message: "Account created successfully! Please check your email to verify your account.",
+            message: user.role === "admin" 
+                ? "Admin account created successfully! You can now login." 
+                : "Account created successfully! Please check your email to verify your account.",
             emailSent: emailResult.success
         });
     } catch (err) {
@@ -253,8 +262,8 @@ router.post("/login", async(req, res) => {
             return res.status(400).json({ message: "no user exists with this email" });
         }
         
-        // Check if email is verified (only for non-Google OAuth users)
-        if (!user.googleId && !user.emailVerified) {
+        // Check if email is verified (only for non-Google OAuth users and non-admin users)
+        if (!user.googleId && !user.emailVerified && user.role !== "admin") {
             return res.status(401).json({ 
                 message: "Please verify your email address before logging in. Check your inbox for the verification email.",
                 needsVerification: true

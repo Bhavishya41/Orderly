@@ -2,6 +2,7 @@ import useCart from "../contexts/cartContext";
 import { HiOutlineX } from "react-icons/hi";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import React from "react";
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
@@ -16,10 +17,36 @@ export default function CartPage() {
   const [sendingOtp, setSendingOtp] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [resendingVerification, setResendingVerification] = useState(false);
+  const [userRole, setUserRole] = useState(null);
 
-    const handleRequestOtp = async () => {
+  // Check user role on component mount
+  React.useEffect(() => {
+    const checkUserRole = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/profile`, {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const user = await res.json();
+          setUserRole(user.role);
+        }
+      } catch (err) {
+        console.error("Failed to get user role:", err);
+      }
+    };
+    checkUserRole();
+  }, []);
+
+  const handleRequestOtp = async () => {
     setSendingOtp(true);
     setOtpError("");
+    
+    // Skip OTP for admin users
+    if (userRole === "admin") {
+      handlePlaceOrderDirect();
+      return;
+    }
+    
     try {
               const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/order/request-otp`, {
         method: "POST",
@@ -75,6 +102,30 @@ export default function CartPage() {
       setOtpError("Network error. Please try again.");
     } finally {
       setResendingVerification(false);
+    }
+  };
+
+  const handlePlaceOrderDirect = async () => {
+    setPlacingOrder(true);
+    setOrderError("");
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/order`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ products: cart, otp: "" }), // Empty OTP for admin
+      });
+      if (res.ok) {
+        setOrderSuccess(true);
+        clearCart();
+      } else {
+        const data = await res.json();
+        setOtpError(data.message || "Failed to place order.");
+      }
+    } catch (err) {
+      setOtpError("Network error. Please try again.");
+    } finally {
+      setPlacingOrder(false);
     }
   };
 
@@ -205,10 +256,10 @@ export default function CartPage() {
           <div className="flex justify-end mt-6">
             <button
               onClick={handleRequestOtp}
-              disabled={sendingOtp}
+              disabled={sendingOtp || placingOrder}
               className="px-8 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg shadow transition disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {sendingOtp ? "Sending OTP..." : "Place Order"}
+              {sendingOtp ? "Sending OTP..." : placingOrder ? "Placing Order..." : userRole === "admin" ? "Place Order (Admin)" : "Place Order"}
             </button>
           </div>
           {/* Error message */}
