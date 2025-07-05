@@ -3,7 +3,8 @@ const express = require("express");
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT;
-const db = require("./middlewares/db");
+const connectDB = require("./middlewares/db");
+connectDB();
 const userRoutes = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
@@ -14,8 +15,6 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const session = require("express-session");
 const passport = require("passport");
-
-mongo.connect(process.env.MONGODB_URL_LOCAL);
 
 // Initialize passport and session
 app.use(session({
