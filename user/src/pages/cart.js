@@ -23,8 +23,17 @@ export default function CartPage() {
   React.useEffect(() => {
     const checkUserRole = async () => {
       try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.log("No token found");
+          return;
+        }
+
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/profile`, {
-          credentials: "include",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
         if (res.ok) {
           const user = await res.json();
@@ -48,10 +57,13 @@ export default function CartPage() {
     }
     
     try {
-              const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/order/request-otp`, {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/order/request-otp`, {
         method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`
+        },
       });
       if (res.ok) {
         setShowOtpModal(true);
@@ -74,8 +86,12 @@ export default function CartPage() {
     setResendingVerification(true);
     try {
       // Get user email from profile
-              const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/profile`, {
-        credentials: "include",
+      const token = localStorage.getItem('token');
+      const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       
       if (profileRes.ok) {
@@ -83,8 +99,10 @@ export default function CartPage() {
         
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/resend-verification`, {
           method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify({ email: user.email }),
         });
         
@@ -109,10 +127,13 @@ export default function CartPage() {
     setPlacingOrder(true);
     setOrderError("");
     try {
+      const token = localStorage.getItem('token');
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/order`, {
         method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ products: cart, otp: "" }), // Empty OTP for admin
       });
       if (res.ok) {
@@ -138,10 +159,13 @@ export default function CartPage() {
     setPlacingOrder(true);
     setOrderError("");
     try {
-              const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/order`, {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/order`, {
         method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ products: cart, otp: otp.trim() }),
       });
       if (res.ok) {

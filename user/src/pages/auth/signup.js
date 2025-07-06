@@ -34,11 +34,10 @@ export default function SignUp() {
     try {
       console.log("Submitting...");
       console.log("About to fetch...");
-              const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/signup`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: form.name, email: form.email, password: form.password }),
-        credentials: "include",
       });
       console.log("Fetch done", res);
       if (!res.ok) {

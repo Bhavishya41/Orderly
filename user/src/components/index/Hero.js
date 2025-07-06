@@ -8,11 +8,29 @@ export default function Hero({ marqueeImages = [] }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          setLoggedIn(false);
+          setLoading(false);
+          return;
+        }
+
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/profile`, {
-          credentials: "include",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
-        setLoggedIn(res.ok);
-      } catch {
+        
+        if (res.ok) {
+          setLoggedIn(true);
+        } else {
+          localStorage.removeItem('token');
+          setLoggedIn(false);
+        }
+      } catch (err) {
+        localStorage.removeItem('token');
         setLoggedIn(false);
       }
       setLoading(false);

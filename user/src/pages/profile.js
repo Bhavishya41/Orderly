@@ -21,10 +21,13 @@ export default function ProfilePage() {
     setPwSuccess("");
     setPwError("");
     try {
-      const res = await fetch(process.env.NEXT_PUBLIC_API_URL, {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/profile/password`, {
         method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ currPassword, newPassword }),
       });
       const data = await res.json();
@@ -47,9 +50,26 @@ export default function ProfilePage() {
       setLoading(true);
       setError("");
       try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError("Not authenticated");
+          setLoading(false);
+          return;
+        }
+
         const [userRes, ordersRes] = await Promise.all([
-                  fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/profile`, { credentials: "include" }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/order`, { credentials: "include" })
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/profile`, { 
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/order`, { 
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          })
         ]);
         if (!userRes.ok) throw new Error("Failed to fetch user info");
         if (!ordersRes.ok) throw new Error("Failed to fetch orders");
