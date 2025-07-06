@@ -36,11 +36,10 @@ export default function SetupPassword() {
 
     setLoading(true);
     try {
-              const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/setup-password`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/setup-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
-        credentials: "include",
       });
 
       if (!res.ok) {
@@ -52,6 +51,12 @@ export default function SetupPassword() {
 
       const data = await res.json();
       setLoading(false);
+      
+      // Store token in localStorage
+      localStorage.setItem('token', data.token);
+      
+      // Trigger auth change event
+      window.dispatchEvent(new Event("authchange"));
       
       // Redirect to home page
       window.location.href = "/";

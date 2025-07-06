@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import {
   HiOutlineSearch,
   HiOutlineLightningBolt,
@@ -127,8 +128,21 @@ function getFanCardStyle(i, total, isHovered, neonColor) {
 export default function LandingPage() {
   const [search, setSearch] = useState("");
   const [hovered, setHovered] = useState(null);
+  const router = useRouter();
   // Remove the shuffle and use deterministic order
   const marqueeImages = [...productImages, ...productImages, ...productImages];
+
+  // Handle token from OAuth callback
+  useEffect(() => {
+    const { token } = router.query;
+    if (token) {
+      console.log("Token received from OAuth callback");
+      localStorage.setItem('token', token);
+      // Remove token from URL and trigger auth check
+      router.replace('/', undefined, { shallow: true });
+      window.dispatchEvent(new Event("authchange"));
+    }
+  }, [router.query]);
 
   // Create deterministic particle positions
   const particles = useMemo(() => {

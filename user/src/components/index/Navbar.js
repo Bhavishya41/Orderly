@@ -28,13 +28,34 @@ export default function Navbar() {
     const checkAuth = async () => {
       try {
         console.log("Checking authentication...");
+        const token = localStorage.getItem('token');
+        console.log("Token from localStorage:", token ? "found" : "not found");
+        
+        if (!token) {
+          console.log("No token found in localStorage");
+          setLoggedIn(false);
+          setLoading(false);
+          return;
+        }
+
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/profile`, {
-          credentials: "include",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         });
         console.log("Auth check response:", res.status, res.ok);
-        setLoggedIn(res.ok);
+        
+        if (res.ok) {
+          setLoggedIn(true);
+        } else {
+          console.log("Auth check failed, clearing token");
+          localStorage.removeItem('token');
+          setLoggedIn(false);
+        }
       } catch (err) {
         console.log("Auth check error:", err);
+        localStorage.removeItem('token');
         setLoggedIn(false);
       }
       setLoading(false);
@@ -45,10 +66,22 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = async () => {
-              await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/logout`, {
-      method: "POST",
-      credentials: "include",
-    });
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/logout`, {
+          method: "POST",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+    } catch (err) {
+      console.log("Logout error:", err);
+    }
+    
+    localStorage.removeItem('token');
     setLoggedIn(false);
     window.dispatchEvent(new Event("authchange"));
     window.location.reload();

@@ -104,16 +104,9 @@ router.get("/api/auth/google/callback",
                     let payload = { id: req.user.id };
                     let token = generateToken(payload);
                     
-                    res.cookie("token", token, {
-                        httpOnly: true,
-                        secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
-                        sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for cross-domain in production
-                        path: "/",
-                        maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
-                    });
-
-                    // Redirect to home page without token in URL
-                    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/`);
+                    // For user frontend, return token in URL instead of cookie
+                    // The user frontend will store it in localStorage
+                    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/?token=${token}`);
                 }
             }
         } catch (error) {
@@ -278,13 +271,14 @@ router.post("/login", async(req, res) => {
         }
         let payload = { id: user.id };
         let token = generateToken(payload);
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
-            sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for cross-domain in production
-            path: "/",
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
-        });
+        // Don't set cookies for user frontend - they'll use token-based auth
+        // res.cookie("token", token, {
+        //     httpOnly: true,
+        //     secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
+        //     sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for cross-domain in production
+        //     path: "/",
+        //     maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+        // });
 
         res.status(200).json({ token: token, role: user.role });
     } catch (err) {
@@ -378,14 +372,14 @@ router.post("/setup-password", tempTokenAuthMiddleware, async (req, res) => {
         let payload = { id: user.id };
         let token = generateToken(payload);
         
-        // Set permanent token cookie
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
-            sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for cross-domain in production
-            path: "/",
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
-        });
+        // Don't set cookies for user frontend - they'll use token-based auth
+        // res.cookie("token", token, {
+        //     httpOnly: true,
+        //     secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
+        //     sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for cross-domain in production
+        //     path: "/",
+        //     maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+        // });
         
         // Clear temp token
         res.cookie("temp_token", "", {

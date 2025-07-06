@@ -36,7 +36,6 @@ export default function Login() {
       // Also try to clear any cookies by calling logout endpoint
       fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/logout`, {
         method: "POST",
-        credentials: "include",
       }).catch(err => {
         console.log("Logout call failed (expected if not logged in):", err);
       });
@@ -62,7 +61,6 @@ export default function Login() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
-        credentials: "include",
       });
       if (!res.ok) {
         const data = await res.json();
@@ -79,6 +77,10 @@ export default function Login() {
       }
       const data = await res.json();
       console.log("Login successful:", data);
+      
+      // Store token in localStorage
+      localStorage.setItem('token', data.token);
+      
       setSuccess(true);
       window.dispatchEvent(new Event("authchange"));
       if (data.role === "admin") {
@@ -96,7 +98,7 @@ export default function Login() {
 
   const handleResendVerification = async () => {
     try {
-              const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/resend-verification`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/resend-verification`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: form.email }),
