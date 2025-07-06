@@ -1,7 +1,14 @@
 const jwt = require('jsonwebtoken');
 
 const tempTokenAuthMiddleware = (req, res, next) => {
-    let token = req.cookies.temp_token;
+    // Try to get token from Authorization header first (for user frontend)
+    let token = req.headers.authorization;
+    if (token && token.startsWith('Bearer ')) {
+        token = token.substring(7);
+    } else {
+        // Fallback to cookie (for admin frontend)
+        token = req.cookies.temp_token;
+    }
     
     if (!token) {
         return res.status(401).json({ error: 'Temp token not found' });

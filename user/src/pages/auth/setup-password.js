@@ -8,12 +8,16 @@ export default function SetupPassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [email, setEmail] = useState("");
+  const [tempToken, setTempToken] = useState("");
 
   useEffect(() => {
     if (router.query.email) {
       setEmail(router.query.email);
     }
-  }, [router.query.email]);
+    if (router.query.temp_token) {
+      setTempToken(router.query.temp_token);
+    }
+  }, [router.query.email, router.query.temp_token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,7 +42,10 @@ export default function SetupPassword() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/setup-password`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${tempToken}`
+        },
         body: JSON.stringify({ password }),
       });
 

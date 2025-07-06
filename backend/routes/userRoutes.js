@@ -82,15 +82,8 @@ router.get("/api/auth/google/callback",
                 let payload = { id: req.user.id };
                 let tempToken = generateToken(payload);
                 
-                res.cookie("temp_token", tempToken, {
-                    httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
-                    sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for cross-domain in production
-                    path: "/",
-                    maxAge: 10 * 60 * 1000, // 10 minutes
-                });
-                
-                res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/setup-password?email=${user.email}`);
+                // For user frontend, pass temp token in URL instead of cookie
+                res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/setup-password?email=${user.email}&temp_token=${tempToken}`);
             } else {
                 if (isFromSignup) {
                     // User tried to sign up but already has account, redirect to login with message
@@ -381,14 +374,16 @@ router.post("/setup-password", tempTokenAuthMiddleware, async (req, res) => {
         //     maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
         // });
         
-        // Clear temp token
-        res.cookie("temp_token", "", {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
-            sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for cross-domain in production
-            path: "/",
-            expires: new Date(0),
-        });
+        // Clear temp token (only if it exists in cookies - for admin frontend)
+        if (req.cookies.temp_token) {
+            res.cookie("temp_token", "", {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
+                sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for cross-domain in production
+                path: "/",
+                expires: new Date(0),
+            });
+        }
         
         res.status(200).json({ 
             message: "Password set successfully",
