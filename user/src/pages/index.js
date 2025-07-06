@@ -110,6 +110,19 @@ function getFanCardStyle(i, total, isHovered, neonColor) {
       marginLeft: "-160px", // Adjusted for new width
     };
   }
+
+  return {
+    transform: `translate(${x}px, ${y}px) rotate(${rotate}deg)`,
+    zIndex: 10 + Math.abs(i - center),
+    boxShadow: `0 0 10px ${neonColor}20, 0 4px 20px rgba(0,0,0,0.2)`,
+    transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    cursor: "pointer",
+    position: "absolute",
+    left: "50%",
+    top: "0px",
+    width: "320px", // Increased from 260px to 320px
+    marginLeft: "-160px", // Adjusted for new width
+  };
 }
 
 export default function LandingPage() {
