@@ -78,12 +78,6 @@ export default function ProductDetailsPage() {
                 >
                   Add to Cart
                 </button>
-                <button
-                  className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-6 py-3 rounded transition disabled:opacity-50"
-                  disabled={product.stock === 0}
-                >
-                  Buy Now
-                </button>
               </div>
               {/* Offers/Delivery Info (static for now) */}
               <div className="bg-white/10 border border-orange-200/20 rounded-lg p-4 text-white/90 text-sm">
