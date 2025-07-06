@@ -27,11 +27,14 @@ export default function Navbar() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        console.log("Checking authentication...");
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/user/profile`, {
           credentials: "include",
         });
+        console.log("Auth check response:", res.status, res.ok);
         setLoggedIn(res.ok);
-      } catch {
+      } catch (err) {
+        console.log("Auth check error:", err);
         setLoggedIn(false);
       }
       setLoading(false);

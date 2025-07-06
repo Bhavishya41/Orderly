@@ -99,6 +99,8 @@ router.get("/api/auth/google/callback",
                 } else {
                     // Normal login flow
                     console.log("Normal login flow");
+                    console.log("Setting token cookie for user:", req.user.id);
+                    console.log("Redirecting to:", `${process.env.FRONTEND_URL || 'http://localhost:3000'}/`);
                     let payload = { id: req.user.id };
                     let token = generateToken(payload);
                     
@@ -315,11 +317,13 @@ router.put("/profile/password", jwtAuthMiddleware, async (req,res) => {
 
 router.get("/profile", jwtAuthMiddleware, async(req,res) => {
     let userId = req.user.id;
+    console.log("Profile request for user ID:", userId);
     try{
         let user = await User.findById(userId);
+        console.log("Profile found for user:", user.email);
         res.status(200).json(user);
     }catch(err){
-        console.log(err);
+        console.log("Profile error:", err);
         res.status(500).json({message:"internal server error"});
     }
 })
