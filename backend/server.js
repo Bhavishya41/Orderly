@@ -55,3 +55,11 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.listen(port, () => {
     console.log(`listening on port: ${port}`);
 })
+
+app.get("/", (req,res) => {
+    try{
+        res.send("This API is working properly");
+    }catch(err){
+        res.send("Internal server Error");
+    }
+})
