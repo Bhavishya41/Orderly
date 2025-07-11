@@ -16,9 +16,6 @@ router.post("/request-otp", jwtAuthMiddleware, async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        console.log("User email verified status:", user.emailVerified);
-        console.log("User email:", user.email);
-
         // Allow Google OAuth users and admin users to request OTP even if email not verified
         // (they'll get verification email in the callback)
         if (!user.emailVerified && !user.googleId && user.role !== "admin") {

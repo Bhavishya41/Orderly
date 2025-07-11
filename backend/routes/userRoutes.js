@@ -11,18 +11,14 @@ const passport = require("passport");
 const { tempTokenAuthMiddleware } = require("./../middlewares/temp-token");
 const { validateEmailDomain, sendVerificationEmail } = require("./../utils/emailValidator");
 const crypto = require("crypto");
-let admincount = 0;
 
 // Google OAuth routes
 router.get("/api/auth/google", (req, res, next) => {
     // Store the 'from' parameter in the OAuth state
     const from = req.query.from;
     const prompt = req.query.prompt;
-    console.log("OAuth Init - from parameter:", from);
-    console.log("OAuth Init - prompt parameter:", prompt);
     
     const state = from ? Buffer.from(JSON.stringify({ from })).toString('base64') : undefined;
-    console.log("OAuth Init - state:", state);
     
     passport.authenticate("google", { 
         scope: ["profile", "email"],
@@ -38,27 +34,18 @@ router.get("/api/auth/google/callback",
             // Check if user already has a password set
             let user = await User.findById(req.user.id);
             
-            console.log("OAuth Callback - User:", user.email);
-            console.log("OAuth Callback - Has password:", !!user.password);
-            console.log("OAuth Callback - State:", req.query.state);
-            
             // Parse the state parameter
             let isFromSignup = false;
             if (req.query.state) {
                 try {
                     const stateData = JSON.parse(Buffer.from(req.query.state, 'base64').toString());
                     isFromSignup = stateData.from === 'signup';
-                    console.log("OAuth Callback - Parsed state:", stateData);
                 } catch (error) {
                     console.log("OAuth Callback - Failed to parse state:", error);
                 }
             }
             
-            console.log("OAuth Callback - Is from signup:", isFromSignup);
-            
             // Send verification email for Google OAuth users (even though they're pre-verified)
-            // This ensures they have a verification email for any edge cases
-            // Skip verification for admin users
             if (!user.verificationToken && user.role !== "admin") {
                 const verificationToken = crypto.randomBytes(32).toString('hex');
                 const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
@@ -69,16 +56,10 @@ router.get("/api/auth/google/callback",
                 
                 // Send verification email
                 const emailResult = await sendVerificationEmail(user.email, verificationToken);
-                if (emailResult.success) {
-                    console.log("Verification email sent to Google OAuth user:", user.email);
-                } else {
-                    console.error("Failed to send verification email to Google OAuth user:", emailResult.error);
-                }
             }
             
             if (!user.password) {
                 // User doesn't have a password, redirect to password setup
-                console.log("Redirecting to password setup");
                 let payload = { id: req.user.id };
                 let tempToken = generateToken(payload);
                 
@@ -87,13 +68,9 @@ router.get("/api/auth/google/callback",
             } else {
                 if (isFromSignup) {
                     // User tried to sign up but already has account, redirect to login with message
-                    console.log("Redirecting to login with account exists message");
                     res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/login?error=account_exists&email=` + encodeURIComponent(user.email));
                 } else {
                     // Normal login flow
-                    console.log("Normal login flow");
-                    console.log("Setting token cookie for user:", req.user.id);
-                    console.log("Redirecting to:", `${process.env.FRONTEND_URL || 'http://localhost:3000'}/`);
                     let payload = { id: req.user.id };
                     let token = generateToken(payload);
                     
@@ -103,7 +80,6 @@ router.get("/api/auth/google/callback",
                 }
             }
         } catch (error) {
-            console.error("Google OAuth callback error:", error);
             res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/login?error=oauth_failed`);
         }
     }
@@ -151,7 +127,6 @@ router.post("/signup", async(req, res) => {
         
         let newUser = await new User(user);
         let result = await newUser.save();
-        console.log("User saved:", result);
 
         // Send verification email (skip for admin users)
         let emailResult = { success: true };
@@ -265,14 +240,7 @@ router.post("/login", async(req, res) => {
         let payload = { id: user.id };
         let token = generateToken(payload);
         // Don't set cookies for user frontend - they'll use token-based auth
-        // res.cookie("token", token, {
-        //     httpOnly: true,
-        //     secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
-        //     sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for cross-domain in production
-        //     path: "/",
-        //     maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
-        // });
-
+ 
         res.status(200).json({ token: token, role: user.role });
     } catch (err) {
         console.log(err);
@@ -364,15 +332,6 @@ router.post("/setup-password", tempTokenAuthMiddleware, async (req, res) => {
         // Generate permanent token
         let payload = { id: user.id };
         let token = generateToken(payload);
-        
-        // Don't set cookies for user frontend - they'll use token-based auth
-        // res.cookie("token", token, {
-        //     httpOnly: true,
-        //     secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
-        //     sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax", // "none" for cross-domain in production
-        //     path: "/",
-        //     maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
-        // });
         
         // Clear temp token (only if it exists in cookies - for admin frontend)
         if (req.cookies.temp_token) {
