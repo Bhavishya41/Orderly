@@ -179,7 +179,9 @@ export default function LandingPage() {
       <Hero />
 
       {/* Moving Banner (Marquee) */}
-      <MovingBanner images={marqueeImages} />
+      <div className="relative z-0">
+        <MovingBanner images={marqueeImages} />
+      </div>
 
       {/* Services/Features Section */}
       <section className="max-w-7xl mx-auto px-4 py-40 relative min-h-[520px]">
