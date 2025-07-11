@@ -158,7 +158,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col relative overflow-x-hidden bg-black" style={{ paddingTop: NAVBAR_HEIGHT }}>
       {/* Animated Background */}
-      <div className="fixed inset-0 z-10 pointer-events-none">
+      <div className="fixed inset-0 z--1 pointer-events-none">
         <div
           className="absolute inset-0"
           style={{
