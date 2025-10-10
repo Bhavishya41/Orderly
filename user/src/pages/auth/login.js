@@ -119,12 +119,12 @@ export default function Login() {
 
   const handleGoogleLogin = () => {
     // Redirect to Google OAuth
-            window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/user/api/auth/google`;
+            window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/google`;
   };
 
   const handleDifferentGoogleAccount = () => {
     // Redirect to Google OAuth with prompt=select_account to force account selection
-            window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/user/api/auth/google?prompt=select_account`;
+            window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/google?prompt=select_account`;
   };
 
   return (
