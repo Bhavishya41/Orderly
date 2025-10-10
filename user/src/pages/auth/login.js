@@ -124,7 +124,7 @@ export default function Login() {
 
   const handleDifferentGoogleAccount = () => {
     // Redirect to Google OAuth with prompt=select_account to force account selection
-            window.location.href = `${process.env.NEXT_PUBLIC_API_URL'}/user/api/auth/google?prompt=select_account`;
+            window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/user/api/auth/google?prompt=select_account`;
   };
 
   return (
